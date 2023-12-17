@@ -18,13 +18,20 @@ class HashChainApp {
       // make table
       HashTable theHashTable = new HashTable(size);
 
+      System.out.println("Initial key sequence: ");
       for (int j = 0; j < n; j++) // insert data
       {
          aKey = (int) (java.lang.Math.random() *
                keysPerCell * size);
+         System.out.print(aKey + " ");
          aDataItem = new Link(aKey);
          theHashTable.insert(aDataItem);
       }
+      System.out.println();
+
+      theHashTable.displayAverageProbeLength();
+      System.out.println("Load factor after initial filling: " + theHashTable.getLoadFactor());
+
       while (true) // interact with user
       {
          System.out.print("Enter first letter of ");
@@ -59,7 +66,7 @@ class HashChainApp {
          } // end switch
       } // end while
    } // end main()
-   // --------------------------------------------------------------
+     // --------------------------------------------------------------
 
    public static String getString() throws IOException {
       InputStreamReader isr = new InputStreamReader(System.in);
@@ -81,7 +88,7 @@ class HashChainApp {
    }
    // --------------------------------------------------------------
 } // end class HashChainApp
-////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////
 
 class Link { // (could be other items)
    private int iData; // data item
@@ -104,13 +111,13 @@ class Link { // (could be other items)
       System.out.print(iData + " ");
    }
 } // end class Link
-////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////
 
 class SortedList {
    private Link first; // ref to first list item
    // -------------------------------------------------------------
 
-   public void SortedList() // constructor
+   public SortedList() // constructor
    {
       first = null;
    }
@@ -132,7 +139,7 @@ class SortedList {
          previous.next = theLink; // prev --> new link
       theLink.next = current; // new link --> current
    } // end insert()
-   // -------------------------------------------------------------
+     // -------------------------------------------------------------
 
    public void delete(int key) // delete link
    { // (assumes non-empty list)
@@ -149,7 +156,7 @@ class SortedList {
       else // not at beginning
          previous.next = current.next; // delete current link
    } // end delete()
-   // -------------------------------------------------------------
+     // -------------------------------------------------------------
 
    public Link find(int key) // find link
    {
@@ -162,7 +169,7 @@ class SortedList {
       }
       return null; // didn't find it
    } // end find()
-   // -------------------------------------------------------------
+     // -------------------------------------------------------------
 
    public void displayList() {
       System.out.print("List (first-->last): ");
@@ -175,11 +182,14 @@ class SortedList {
       System.out.println("");
    }
 } // end class SortedList
-////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////
 
 class HashTable {
    private SortedList[] hashArray; // array of lists
    private int arraySize;
+   private int totalProbeLength;
+   private int numInsertions;
+   private int numElements;
 
    // -------------------------------------------------------------
    public HashTable(int size) // constructor
@@ -188,6 +198,10 @@ class HashTable {
       hashArray = new SortedList[arraySize]; // create array
       for (int j = 0; j < arraySize; j++) // fill array
          hashArray[j] = new SortedList(); // with lists
+   }
+
+   public double getLoadFactor() {
+      return (double) numElements / arraySize;
    }
 
    // -------------------------------------------------------------
@@ -210,23 +224,55 @@ class HashTable {
    {
       int key = theLink.getKey();
       int hashVal = hashFunc(key); // hash the key
+      int originalHashVal = hashVal;
+      int probeCount = 0;
+
+      while (hashArray[hashVal].find(key) != null) {
+         ++probeCount;
+         ++hashVal;
+         hashVal %= arraySize;
+      }
+
       hashArray[hashVal].insert(theLink); // insert at hashVal
+      totalProbeLength += probeCount;
+      ++numInsertions;
+      ++numElements;
+
+      System.out
+            .println("Inserted key " + key + " with hash value " + originalHashVal + " probe length: " + probeCount);
    } // end insert()
-   // -------------------------------------------------------------
+     // -------------------------------------------------------------
+
+   public void displayAverageProbeLength() {
+      double averageProbeLength = (double) totalProbeLength / numInsertions;
+      System.out.println("Average probe length for the initial filling: " + averageProbeLength);
+      System.out.println("Load factor: " + getLoadFactor());
+   }
 
    public void delete(int key) // delete a link
    {
       int hashVal = hashFunc(key); // hash the key
       hashArray[hashVal].delete(key); // delete link
    } // end delete()
-   // -------------------------------------------------------------
+     // -------------------------------------------------------------
 
    public Link find(int key) // find link
    {
       int hashVal = hashFunc(key); // hash the key
+      int originalHashVal = hashVal;
+      int probeCount = 0;
+
+      while (hashArray[hashVal].find(key) == null) {
+         ++probeCount;
+         ++hashVal;
+         hashVal %= arraySize;
+      }
+
       Link theLink = hashArray[hashVal].find(key); // get link
+
+      System.out.println("Found key " + key + " with hash value " + originalHashVal + " probe length: " + probeCount);
       return theLink; // return link
    }
    // -------------------------------------------------------------
 } // end class HashTable
-////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////
