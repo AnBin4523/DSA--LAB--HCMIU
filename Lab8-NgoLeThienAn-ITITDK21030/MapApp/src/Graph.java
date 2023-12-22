@@ -1,7 +1,10 @@
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 
 public class Graph {
     private Map<String, Node> nodes;
@@ -101,5 +104,46 @@ public class Graph {
             }
         }
         return longestPath;
+    }
+
+    public List<Node> dijkstraShortestPath(Node start, Node end) {
+        Map<Node, Integer> distance = new HashMap<>();
+        Map<Node, Node> predecessor = new HashMap<>();
+        PriorityQueue<Node> priorityQueue = new PriorityQueue<>(Comparator.comparingInt(distance::get));
+
+        // Initialize distances
+        for (Node node : nodes.values()) {
+            distance.put(node, Integer.MAX_VALUE);
+            predecessor.put(node, null);
+        }
+        distance.put(start, 0);
+
+        priorityQueue.add(start);
+
+        while (!priorityQueue.isEmpty()) {
+            Node current = priorityQueue.poll();
+
+            for (Edge edge : current.getEdges()) {
+                Node neighbor = edge.getDestination();
+                int newDistance = distance.get(current) + edge.getWeight();
+
+                if (newDistance < distance.get(neighbor)) {
+                    distance.put(neighbor, newDistance);
+                    predecessor.put(neighbor, current);
+                    priorityQueue.add(neighbor);
+                }
+            }
+        }
+
+        // Reconstruct the path
+        List<Node> path = new ArrayList<>();
+        Node current = end;
+        while (current != null) {
+            path.add(current);
+            current = predecessor.get(current);
+        }
+        Collections.reverse(path);
+
+        return path;
     }
 }

@@ -17,6 +17,15 @@ public class MapApp {
         List<Node> longestPath = graph.getLongestPath(start, end);
         int longestCost = graph.calculatePathCost(longestPath);
         System.out.println("Longest path from A to K: " + longestPath + ", cost: " + longestCost);
+
+        // Apply Dijkstra's Algorithm
+        // Find the shortest path from A to H
+        List<Node> shortestPathAH = graph.dijkstraShortestPath(graph.getNode("A"), graph.getNode("H"));
+        System.out.println("Shortest path from A to H: " + shortestPathAH);
+
+        // Find the shortest path from B to J
+        List<Node> shortestPathBJ = graph.dijkstraShortestPath(graph.getNode("B"), graph.getNode("J"));
+        System.out.println("Shortest path from B to J: " + shortestPathBJ);
     }
 
     public static Graph buildGraph() {
